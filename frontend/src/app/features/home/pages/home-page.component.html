@@ -1,0 +1,210 @@
+<div class="homepage-container">
+
+  <!-- ── 1. HERO SLIDER ────────────────────────────────────── -->
+  <section class="hero-slider" aria-label="Featured Promotions">
+    <div class="slider-wrapper">
+      @for (slide of slides; track slide.title; let idx = $index) {
+        <div
+          class="slide"
+          [class.active]="currentSlide() === idx"
+          [style.backgroundImage]="'linear-gradient(180deg, rgba(15,23,42,0.3) 0%, rgba(15,23,42,0.85) 100%), url(' + slide.image + ')'"
+        >
+          <div class="slide-content">
+            <span class="slide-badge">{{ slide.badge }}</span>
+            <span class="slide-subtitle">{{ slide.subtitle }}</span>
+            <h1 class="slide-title">{{ slide.title }}</h1>
+            <p class="slide-desc">{{ slide.description }}</p>
+            <div class="slide-actions">
+              <a [routerLink]="slide.ctaLink" class="btn btn--primary">
+                {{ slide.ctaText }}
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Navigation Arrows -->
+    <button type="button" class="arrow arrow--prev" (click)="prevSlide()" aria-label="Previous Slide">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <button type="button" class="arrow arrow--next" (click)="nextSlide()" aria-label="Next Slide">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+
+    <!-- Indicators -->
+    <div class="slider-indicators">
+      @for (slide of slides; track $index; let idx = $index) {
+        <button
+          type="button"
+          class="indicator"
+          [class.active]="currentSlide() === idx"
+          (click)="setSlide(idx)"
+          [attr.aria-label]="'Go to slide ' + (idx + 1)"
+        ></button>
+      }
+    </div>
+  </section>
+
+  <!-- ── LOADING / ERROR HANDLERS ──────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading curated collections...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <div class="error-card">
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+        <h3>Something went wrong</h3>
+        <p>{{ error() }}</p>
+      </div>
+    </div>
+  } @else {
+
+    <!-- ── 2. FEATURED PRODUCTS ──────────────────────────────── -->
+    <section class="section" id="featured-products">
+      <div class="section-header">
+        <div>
+          <span class="section-badge">Curated</span>
+          <h2 class="section-title">Featured Products</h2>
+        </div>
+        <a routerLink="/products" class="view-all-link">
+          View All
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      @if (featuredProducts().length === 0) {
+        <ng-container *ngTemplateOutlet="emptyState"></ng-container>
+      } @else {
+        <div class="product-grid">
+          @for (prod of featuredProducts(); track prod.id) {
+            <ng-container *ngTemplateOutlet="productCard; context: { $implicit: prod }"></ng-container>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- ── 3. NEW ARRIVALS ──────────────────────────────────── -->
+    <section class="section section--alt" id="new-arrivals">
+      <div class="section-header">
+        <div>
+          <span class="section-badge">Fresh</span>
+          <h2 class="section-title">New Arrivals</h2>
+        </div>
+        <a routerLink="/products" class="view-all-link">
+          View All
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      @if (newArrivals().length === 0) {
+        <ng-container *ngTemplateOutlet="emptyState"></ng-container>
+      } @else {
+        <div class="product-grid">
+          @for (prod of newArrivals(); track prod.id) {
+            <ng-container *ngTemplateOutlet="productCard; context: { $implicit: prod }"></ng-container>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- ── 4. TRENDING PRODUCTS ─────────────────────────────── -->
+    <section class="section" id="trending-products">
+      <div class="section-header">
+        <div>
+          <span class="section-badge">Popular</span>
+          <h2 class="section-title">Trending Products</h2>
+        </div>
+        <a routerLink="/products" class="view-all-link">
+          View All
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      @if (trendingProducts().length === 0) {
+        <ng-container *ngTemplateOutlet="emptyState"></ng-container>
+      } @else {
+        <div class="product-grid">
+          @for (prod of trendingProducts(); track prod.id) {
+            <ng-container *ngTemplateOutlet="productCard; context: { $implicit: prod }"></ng-container>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- ── 5. BEST SELLERS ──────────────────────────────────── -->
+    <section class="section section--alt" id="best-sellers">
+      <div class="section-header">
+        <div>
+          <span class="section-badge">Top Voted</span>
+          <h2 class="section-title">Best Sellers</h2>
+        </div>
+        <a routerLink="/products" class="view-all-link">
+          View All
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      @if (bestSellers().length === 0) {
+        <ng-container *ngTemplateOutlet="emptyState"></ng-container>
+      } @else {
+        <div class="product-grid">
+          @for (prod of bestSellers(); track prod.id) {
+            <ng-container *ngTemplateOutlet="productCard; context: { $implicit: prod }"></ng-container>
+          }
+        </div>
+      }
+    </section>
+
+  }
+
+</div>
+
+<!-- ── REUSABLE PRODUCT CARD TEMPLATE ────────────────────── -->
+<ng-template #productCard let-prod>
+  <div class="product-card">
+    <div class="product-card-media">
+      @if (prod.images && prod.images.length > 0) {
+        <img
+          [src]="prod.images[0]"
+          [alt]="prod.title"
+          class="product-card-img"
+          loading="lazy"
+        />
+      } @else {
+        <div class="product-card-img-placeholder">
+          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+        </div>
+      }
+      <div class="product-card-badge-row">
+        @for (tag of prod.tags | slice:0:1; track tag) {
+          <span class="product-tag-badge">{{ tag }}</span>
+        }
+      </div>
+    </div>
+    <div class="product-card-info">
+      <h3 class="product-card-title">{{ prod.title }}</h3>
+      <p class="product-card-desc">{{ prod.description }}</p>
+      <div class="product-card-footer">
+        <span class="product-card-price">{{ prod.price | currency }}</span>
+        <a [routerLink]="['/products', prod.slug]" class="btn btn--sm btn--primary">
+          View Detail
+        </a>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ── REUSABLE EMPTY STATE TEMPLATE ────────────────────── -->
+<ng-template #emptyState>
+  <div class="empty-state-card">
+    <div class="empty-state-icon">
+      <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m8.25 3v6.75m0 0l-3-3m3 3l3-3M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"/></svg>
+    </div>
+    <h4>No products here yet</h4>
+    <p>We are currently updating our collections. Please check back later.</p>
+  </div>
+</ng-template>

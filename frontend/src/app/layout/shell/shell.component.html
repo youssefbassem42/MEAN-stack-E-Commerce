@@ -1,0 +1,66 @@
+<div class="min-h-screen bg-[var(--color-surface)] text-[var(--color-text)] transition-colors duration-300">
+  <header class="border-b border-black/10 bg-white/70 backdrop-blur dark:border-white/10 dark:bg-slate-950/70">
+    <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+      <a routerLink="/" class="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-brand)]">
+        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-brand)] text-white shadow-lg shadow-orange-400/30">EC</span>
+        Commerce
+      </a>
+
+      <div class="hidden items-center gap-6 md:flex">
+        <a routerLink="/" class="text-sm font-semibold transition hover:text-[var(--color-brand)]">Home</a>
+        <a routerLink="/products" class="text-sm font-semibold transition hover:text-[var(--color-brand)]">Shop Catalog</a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        @if (authService.isLoggedIn()) {
+          <a
+            routerLink="/profile"
+            id="nav-profile"
+            class="hidden rounded-full border border-black/10 px-4 py-2 text-sm font-medium transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] dark:border-white/10 md:inline-flex"
+          >
+            My Profile
+          </a>
+        } @else {
+          <a
+            routerLink="/auth/login"
+            id="nav-login"
+            class="hidden rounded-full border border-black/10 px-4 py-2 text-sm font-medium transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] dark:border-white/10 md:inline-flex"
+          >
+            Sign In
+          </a>
+          <a
+            routerLink="/auth/register"
+            id="nav-register"
+            class="hidden rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-orange-400/25 transition hover:opacity-90 md:inline-flex"
+          >
+            Register
+          </a>
+        }
+        <button
+          type="button"
+          id="theme-toggle"
+          class="rounded-full border border-black/10 px-4 py-2 text-sm font-medium transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] dark:border-white/10"
+          (click)="themeService.toggleTheme()"
+        >
+          {{ themeService.mode() === 'dark' ? '☀ Light' : '☾ Dark' }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <router-outlet />
+  </main>
+
+  <footer class="border-t border-black/10 bg-white/80 dark:border-white/10 dark:bg-slate-950/80">
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between dark:text-slate-400">
+      <p>© 2026 Commerce. All rights reserved.</p>
+      <div class="flex gap-4">
+        <a routerLink="/" class="hover:text-[var(--color-brand)] transition">Home</a>
+        <a routerLink="/products" class="hover:text-[var(--color-brand)] transition">Shop Catalog</a>
+        <a routerLink="/auth/login" class="hover:text-[var(--color-brand)] transition">Sign In</a>
+        <a routerLink="/auth/register" class="hover:text-[var(--color-brand)] transition">Register</a>
+      </div>
+    </div>
+  </footer>
+</div>

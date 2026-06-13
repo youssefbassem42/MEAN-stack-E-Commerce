@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+  --color-surface: #fffaf5;
+  --color-brand: #ea580c;
+  --color-text: #0f172a;
+}
+
+:root.dark {
+  color-scheme: dark;
+  --color-surface: #020617;
+  --color-brand: #fb923c;
+  --color-text: #e2e8f0;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", "Segoe UI", sans-serif;
+  background:
+    linear-gradient(180deg, rgba(234, 88, 12, 0.06), transparent 25%),
+    var(--color-surface);
+  color: var(--color-text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

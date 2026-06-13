@@ -1,0 +1,265 @@
+<div class="search-catalog-page">
+
+  <!-- ── SEARCH HEADER ────────────────────────────────────── -->
+  <header class="catalog-header">
+    <div class="header-content">
+      <h1 class="catalog-title">Explore Catalog</h1>
+      <p class="catalog-subtitle">Search, filter, and discover our premium products.</p>
+    </div>
+
+    <!-- Search Input Wrapper -->
+    <div class="search-bar-wrapper">
+      <div class="search-input-container">
+        <svg class="search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input
+          type="text"
+          id="search-input"
+          [formControl]="searchControl"
+          placeholder="Search products, brands, tags..."
+          class="search-input"
+        />
+        @if (searchControl.value) {
+          <button type="button" class="search-clear-btn" (click)="searchControl.setValue('')" aria-label="Clear Search">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- ── CATEGORY QUICK NAVIGATION ────────────────────────── -->
+  <nav class="category-tabs-nav" aria-label="Category Quick Links">
+    <div class="category-tabs-scroll">
+      <button
+        type="button"
+        class="category-tab"
+        [class.active]="selectedCategory() === ''"
+        (click)="onCategorySelect('')"
+      >
+        All Products
+      </button>
+      @for (cat of categories(); track cat.id) {
+        <button
+          type="button"
+          class="category-tab"
+          [class.active]="selectedCategory() === cat.slug"
+          (click)="onCategorySelect(cat.slug)"
+        >
+          {{ cat.name }}
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- ── MAIN CATALOG GRID & SIDEBAR ─────────────────────── -->
+  <div class="catalog-layout">
+
+    <!-- 1. Filters Sidebar -->
+    <aside class="catalog-sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">Filters</h2>
+          <button type="button" class="btn-clear-all" (click)="clearFilters()">Reset All</button>
+        </div>
+
+        <!-- Category Dropdown (Mobile-friendly/alternative view) -->
+        <div class="filter-group">
+          <label for="category-select" class="filter-label">Category</label>
+          <select
+            id="category-select"
+            [value]="selectedCategory()"
+            (change)="onCategorySelect($any($event.target).value)"
+            class="filter-select"
+          >
+            <option value="">All Categories</option>
+            @for (cat of categories(); track cat.id) {
+              <option [value]="cat.slug">{{ cat.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Price Range Filter -->
+        <div class="filter-group">
+          <label class="filter-label">Price Range</label>
+          <div class="price-input-row">
+            <div class="price-field">
+              <span class="currency-indicator">$</span>
+              <input
+                type="number"
+                placeholder="Min"
+                [formControl]="minPriceInput"
+                class="price-input"
+                min="0"
+              />
+            </div>
+            <span class="price-divider">to</span>
+            <div class="price-field">
+              <span class="currency-indicator">$</span>
+              <input
+                type="number"
+                placeholder="Max"
+                [formControl]="maxPriceInput"
+                class="price-input"
+                min="0"
+              />
+            </div>
+          </div>
+          <button type="button" class="btn-apply-price" (click)="applyPriceFilter()">
+            Apply Price
+          </button>
+        </div>
+
+        <!-- Sorting Selection (Duplicates header sorting for convenience) -->
+        <div class="filter-group">
+          <label for="sidebar-sort-select" class="filter-label">Sort By</label>
+          <select
+            id="sidebar-sort-select"
+            [value]="sort()"
+            (change)="onSortChange($event)"
+            class="filter-select"
+          >
+            <option value="newest">Newest Arrivals</option>
+            <option value="oldest">Oldest Arrivals</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            @if (searchControl.value) {
+              <option value="relevance">Relevance</option>
+            }
+          </select>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 2. Main Product Area -->
+    <main class="catalog-main">
+
+      <!-- Catalog Top Bar (Result count & Sorting dropdown) -->
+      <div class="catalog-top-bar">
+        <div class="result-count">
+          @if (loading()) {
+            Searching products...
+          } @else {
+            Found <strong>{{ totalProducts() }}</strong> products
+          }
+        </div>
+
+        <div class="sort-selector-wrapper">
+          <label for="top-sort-select" class="sort-label">Sort:</label>
+          <select
+            id="top-sort-select"
+            [value]="sort()"
+            (change)="onSortChange($event)"
+            class="top-sort-select"
+          >
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            @if (searchControl.value) {
+              <option value="relevance">Relevance</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Loading / Error States -->
+      @if (loading()) {
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Filtering items matching criteria...</p>
+        </div>
+      } @else if (error()) {
+        <div class="error-state">
+          <div class="error-card">
+            <h3>Failed to retrieve catalog</h3>
+            <p>{{ error() }}</p>
+          </div>
+        </div>
+      } @else if (products().length === 0) {
+        <div class="empty-state-card">
+          <div class="empty-state-icon">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <h4>No products found</h4>
+          <p>We couldn't find any products matching your search terms or filters. Try resetting filters.</p>
+          <button type="button" class="btn btn--primary" (click)="clearFilters()">Reset All Filters</button>
+        </div>
+      } @else {
+        <!-- Product Grid -->
+        <div class="product-grid">
+          @for (prod of products(); track prod.id) {
+            <div class="product-card">
+              <div class="product-card-media">
+                @if (prod.images && prod.images.length > 0) {
+                  <img
+                    [src]="prod.images[0]"
+                    [alt]="prod.title"
+                    class="product-card-img"
+                    loading="lazy"
+                  />
+                } @else {
+                  <div class="product-card-img-placeholder">
+                    <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                  </div>
+                }
+                <div class="product-card-badge-row">
+                  @for (tag of prod.tags | slice:0:2; track tag) {
+                    <span class="product-tag-badge">{{ tag }}</span>
+                  }
+                </div>
+              </div>
+              <div class="product-card-info">
+                <h3 class="product-card-title">{{ prod.title }}</h3>
+                <p class="product-card-desc">{{ prod.description }}</p>
+                <div class="product-card-footer">
+                  <span class="product-card-price">{{ prod.price | currency }}</span>
+                  <a [routerLink]="['/products', prod.slug]" class="btn btn--sm btn--primary">
+                    View Detail
+                  </a>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Pagination Controls -->
+        @if (totalPages() > 1) {
+          <nav class="pagination" aria-label="Catalog pagination">
+            <button
+              type="button"
+              class="pag-btn"
+              [disabled]="page() === 1"
+              (click)="goToPage(page() - 1)"
+              aria-label="Previous Page"
+            >
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+            </button>
+
+            @for (p of getPagesArray(); track p) {
+              <button
+                type="button"
+                class="pag-btn"
+                [class.active]="p === page()"
+                (click)="goToPage(p)"
+              >
+                {{ p }}
+              </button>
+            }
+
+            <button
+              type="button"
+              class="pag-btn"
+              [disabled]="page() === totalPages()"
+              (click)="goToPage(page() + 1)"
+              aria-label="Next Page"
+            >
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </nav>
+        }
+      }
+    </main>
+
+  </div>
+
+</div>

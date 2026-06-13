@@ -1,0 +1,12 @@
+node_modules
+dist
+coverage
+.angular
+.DS_Store
+.env
+.env.*
+!.env.example
+backend/node_modules
+frontend/node_modules
+backend/dist
+frontend/dist

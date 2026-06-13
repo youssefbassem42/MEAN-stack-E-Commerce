@@ -1,0 +1,243 @@
+<div class="profile-page">
+
+  <!-- ── Sidebar ───────────────────────────────────────────── -->
+  <aside class="profile-sidebar">
+    <div class="profile-avatar">
+      <span class="profile-avatar-initials">
+        {{ (profile()?.firstName?.[0] ?? '') + (profile()?.lastName?.[0] ?? '') }}
+      </span>
+    </div>
+    <p class="profile-name">{{ profile()?.firstName }} {{ profile()?.lastName }}</p>
+    <p class="profile-email">{{ profile()?.email }}</p>
+
+    <nav class="profile-nav">
+      <button
+        id="nav-info"
+        type="button"
+        class="profile-nav-item"
+        [class.active]="activeSection() === 'info'"
+        (click)="setSection('info')"
+      >
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Personal Info
+      </button>
+      <button
+        id="nav-password"
+        type="button"
+        class="profile-nav-item"
+        [class.active]="activeSection() === 'password'"
+        (click)="setSection('password')"
+      >
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Password
+      </button>
+      <button
+        id="nav-addresses"
+        type="button"
+        class="profile-nav-item"
+        [class.active]="activeSection() === 'addresses'"
+        (click)="setSection('addresses')"
+      >
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        Addresses
+      </button>
+    </nav>
+
+    <button id="logout-btn" type="button" class="profile-logout-btn" (click)="onLogout()">
+      Sign Out
+    </button>
+  </aside>
+
+  <!-- ── Main content ───────────────────────────────────────── -->
+  <main class="profile-main">
+
+    <!-- Personal Info -->
+    @if (activeSection() === 'info') {
+      <section class="profile-section">
+        <h2 class="profile-section-title">Personal Information</h2>
+
+        <form [formGroup]="infoForm" (ngSubmit)="onSaveInfo()" id="info-form" novalidate class="profile-form">
+          <div class="field-row">
+            <div class="field">
+              <label for="info-firstname" class="field-label">First name</label>
+              <input id="info-firstname" type="text" formControlName="firstName" class="field-input" />
+              @if (infoForm.get('firstName')?.invalid && infoForm.get('firstName')?.touched) {
+                <span class="field-error">First name is required.</span>
+              }
+            </div>
+            <div class="field">
+              <label for="info-lastname" class="field-label">Last name</label>
+              <input id="info-lastname" type="text" formControlName="lastName" class="field-input" />
+              @if (infoForm.get('lastName')?.invalid && infoForm.get('lastName')?.touched) {
+                <span class="field-error">Last name is required.</span>
+              }
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Email</label>
+            <input type="email" class="field-input field-input--readonly" [value]="profile()?.email ?? ''" readonly />
+            <span class="field-hint">Email cannot be changed.</span>
+          </div>
+
+          @if (profileError()) {
+            <div class="alert alert--error" role="alert">{{ profileError() }}</div>
+          }
+          @if (profileSuccess()) {
+            <div class="alert alert--success" role="alert">{{ profileSuccess() }}</div>
+          }
+
+          <button id="save-info-btn" type="submit" class="profile-btn" [disabled]="profileLoading()">
+            {{ profileLoading() ? 'Saving…' : 'Save Changes' }}
+          </button>
+        </form>
+      </section>
+    }
+
+    <!-- Password -->
+    @if (activeSection() === 'password') {
+      <section class="profile-section">
+        <h2 class="profile-section-title">Change Password</h2>
+        <p class="profile-section-subtitle">You'll be signed out after a successful password change.</p>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" id="password-form" novalidate class="profile-form">
+          <div class="field">
+            <label for="current-password" class="field-label">Current password</label>
+            <input id="current-password" type="password" formControlName="currentPassword" class="field-input" placeholder="••••••••" />
+            @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched) {
+              <span class="field-error">Current password is required.</span>
+            }
+          </div>
+
+          <div class="field">
+            <label for="new-password" class="field-label">New password</label>
+            <input id="new-password" type="password" formControlName="newPassword" class="field-input" placeholder="Min. 8 characters" />
+            @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+              <span class="field-error">New password must be at least 8 characters.</span>
+            }
+          </div>
+
+          @if (passwordError()) {
+            <div class="alert alert--error" role="alert">{{ passwordError() }}</div>
+          }
+          @if (passwordSuccess()) {
+            <div class="alert alert--success" role="alert">{{ passwordSuccess() }}</div>
+          }
+
+          <button id="change-password-btn" type="submit" class="profile-btn" [disabled]="passwordLoading()">
+            {{ passwordLoading() ? 'Updating…' : 'Update Password' }}
+          </button>
+        </form>
+      </section>
+    }
+
+    <!-- Addresses -->
+    @if (activeSection() === 'addresses') {
+      <section class="profile-section">
+        <div class="profile-section-header">
+          <h2 class="profile-section-title">Saved Addresses</h2>
+          @if (!showAddressForm()) {
+            <button id="add-address-btn" type="button" class="profile-btn profile-btn--sm" (click)="openAddressForm()">
+              + Add Address
+            </button>
+          }
+        </div>
+
+        @if (addressError()) {
+          <div class="alert alert--error" role="alert">{{ addressError() }}</div>
+        }
+        @if (addressSuccess()) {
+          <div class="alert alert--success" role="alert">{{ addressSuccess() }}</div>
+        }
+
+        <!-- Address form -->
+        @if (showAddressForm()) {
+          <form [formGroup]="addressForm" (ngSubmit)="onSaveAddress()" id="address-form" novalidate class="address-form-card">
+            <h3 class="address-form-title">{{ editingAddress() ? 'Edit Address' : 'New Address' }}</h3>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="addr-city" class="field-label">City</label>
+                <input id="addr-city" type="text" formControlName="city" class="field-input" placeholder="Cairo" />
+                @if (addressForm.get('city')?.invalid && addressForm.get('city')?.touched) {
+                  <span class="field-error">City is required.</span>
+                }
+              </div>
+              <div class="field">
+                <label for="addr-street" class="field-label">Street</label>
+                <input id="addr-street" type="text" formControlName="street" class="field-input" placeholder="123 Main St" />
+                @if (addressForm.get('street')?.invalid && addressForm.get('street')?.touched) {
+                  <span class="field-error">Street is required.</span>
+                }
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label for="addr-building" class="field-label">Building</label>
+                <input id="addr-building" type="text" formControlName="building" class="field-input" placeholder="Block 7" />
+                @if (addressForm.get('building')?.invalid && addressForm.get('building')?.touched) {
+                  <span class="field-error">Building is required.</span>
+                }
+              </div>
+              <div class="field">
+                <label for="addr-apartment" class="field-label">Apartment</label>
+                <input id="addr-apartment" type="text" formControlName="apartment" class="field-input" placeholder="Apt 4B" />
+                @if (addressForm.get('apartment')?.invalid && addressForm.get('apartment')?.touched) {
+                  <span class="field-error">Apartment is required.</span>
+                }
+              </div>
+            </div>
+
+            <label class="checkbox-label">
+              <input id="addr-default" type="checkbox" formControlName="isDefault" class="checkbox-input" />
+              <span>Set as default address</span>
+            </label>
+
+            <div class="address-form-actions">
+              <button id="cancel-address-btn" type="button" class="profile-btn profile-btn--ghost" (click)="closeAddressForm()">Cancel</button>
+              <button id="save-address-btn" type="submit" class="profile-btn" [disabled]="addressLoading()">
+                {{ addressLoading() ? 'Saving…' : (editingAddress() ? 'Update' : 'Add Address') }}
+              </button>
+            </div>
+          </form>
+        }
+
+        <!-- Address list -->
+        @if (addresses().length === 0 && !showAddressForm()) {
+          <div class="address-empty">
+            <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            <p>No addresses saved yet.</p>
+          </div>
+        }
+
+        <ul class="address-list">
+          @for (address of addresses(); track address.id) {
+            <li class="address-card" [class.address-card--default]="address.isDefault">
+              @if (address.isDefault) {
+                <span class="address-badge">Default</span>
+              }
+              <p class="address-line">{{ address.apartment }}, {{ address.building }}</p>
+              <p class="address-line">{{ address.street }}, {{ address.city }}</p>
+              <div class="address-actions">
+                <button
+                  [id]="'edit-address-' + address.id"
+                  type="button"
+                  class="address-action-btn"
+                  (click)="openAddressForm(address)"
+                >Edit</button>
+                <button
+                  [id]="'delete-address-' + address.id"
+                  type="button"
+                  class="address-action-btn address-action-btn--danger"
+                  (click)="onDeleteAddress(address.id)"
+                >Delete</button>
+              </div>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
+  </main>
+</div>
