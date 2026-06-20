@@ -65,4 +65,28 @@ export class ProductService {
 
     return this.http.get<SearchResult>('/products/search', { params: httpParams });
   }
+
+  getProduct(idOrSlug: string): Observable<Product & { views: number }> {
+    return this.http.get<Product & { views: number }>(`/products/${idOrSlug}`);
+  }
+
+  getReviews(productId: string): Observable<any[]> {
+    return this.http.get<any[]>(`/reviews/${productId}`);
+  }
+
+  createReview(review: { productId: string; rating: number; comment: string }): Observable<any> {
+    return this.http.post<any>('/reviews', review);
+  }
+
+  createProduct(product: any): Observable<Product> {
+    return this.http.post<Product>('/products', product);
+  }
+
+  updateProduct(id: string, product: any): Observable<Product> {
+    return this.http.put<Product>(`/products/${id}`, product);
+  }
+
+  deleteProduct(id: string): Observable<any> {
+    return this.http.delete<any>(`/products/${id}`);
+  }
 }

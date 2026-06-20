@@ -4,6 +4,7 @@ export interface UserEntity {
   passwordHash: string;
   firstName: string;
   lastName: string;
+  role?: string;
   isEmailVerified: boolean;
   refreshTokenHash?: string | null;
   createdAt: Date;

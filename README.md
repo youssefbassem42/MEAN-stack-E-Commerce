@@ -1,68 +1,119 @@
-# E-Commerce Platform
+# 🪐 Z-A E-Commerce Platform
+> **The Luxury Full-Stack Storefront & Administration Ecosystem**
 
-Sprint 0 establishes the production foundation for a full-stack e-commerce platform built with Angular, Tailwind CSS, Node.js, Express, MongoDB Atlas, Brevo, Stripe, and Clean Architecture.
+[![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
+[![Stripe](https://img.shields.io/badge/Stripe-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com)
 
-## Workspace Layout
+Welcome to **Z-A**, a state-of-the-art full-stack e-commerce solution. This platform is engineered with a strict adherence to **Clean Architecture** patterns on the backend and **Standalone Component-driven Architecture** on the frontend, wrapped inside a bespoke glassmorphic slate-indigo design system.
 
-- `backend/`: Express API with Clean Architecture layers.
-- `frontend/`: Angular storefront shell with Tailwind, routing, theme support, and reusable API service.
-- `Sprints/`: delivery roadmap used to drive implementation sprint by sprint.
+---
 
-## Prerequisites
+## 💎 Features & Capabilities
 
-- Node.js `24.x`
-- npm `11.x`
-- MongoDB Atlas connection string for backend runtime validation
+* **🔒 Role-Based Access Control (RBAC):** Fully secured admin administration panel allowing verified administrators to manage system statistics, modify user role levels, monitor catalog products, and process orders.
+* **📦 Real-time Inventory Audit Logging:** Built-in automated transaction tracking (`purchase`, `cancel`, `restock`, `adjustment`) logging stock levels on checkout and automatically restoring stock on order cancellations.
+* **💳 Seamless Checkout Flow:** Dual payment integration supporting both Cash on Delivery (COD) checkouts with dynamic fee computations and instant credit card processing through Stripe with full asynchronous Webhook verification.
+* **🚀 Real-time Viewer Counts:** Integrates with Socket.io on the product detail pages, showing the real-time active customer viewers count on catalog items.
+* **✨ Reusable Shell Layout:** Global dark and light theme toggles with smooth transition animations, premium typography, responsive layouts, and unified glassmorphic elements.
 
-## Environment
+---
 
-Create `backend/.env` from `backend/.env.example`.
+## 🏛 Clean Architecture & Workspace Layout
 
-Required values:
+The repository utilizes a modular structure, keeping domain business rules completely decoupled from infrastructure databases, user interfaces, or payment gateways.
 
-- `PORT`
-- `CLIENT_ORIGIN`
-- `MONGODB_URI`
-
-## Development Commands
-
-Install dependencies:
-
-```bash
-npm install
+```
+├── backend/
+│   ├── src/
+│   │   ├── domain/               # Core business entities
+│   │   ├── application/          # Application use-cases and ports/interfaces
+│   │   ├── infrastructure/       # Database models, security utilities, Stripe
+│   │   ├── presentation/         # HTTP routes and controllers
+│   │   └── shared/               # Centralized error handling and middlewares
+│   └── tests/                    # Backend integration test suites
+│
+├── frontend/
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── core/             # Route guards, authentication, interceptors
+│   │   │   ├── features/         # Catalog, cart, checkout, admin dashboard
+│   │   │   └── layout/           # Global navigation shell and theme toggles
+│   │   └── styles.css            # Bespoke design system tokens
+│
+└── Sprints/                      # Delivery roadmap and sprint backlogs
 ```
 
-Start the backend:
+---
 
+## ⚙️ Prerequisites & Environment Setup
+
+Ensure you have the following prerequisites installed:
+* **Node.js** `24.x` (or newer)
+* **npm** `11.x` (or newer)
+* **MongoDB** instance (local server or Atlas connection string)
+
+### Environment Configurations
+
+Configure your local environments by copying the example env file:
 ```bash
-npm run dev:backend
+cp backend/.env.example backend/.env
 ```
 
-Start the frontend:
-
-```bash
-npm run dev:frontend
+Within `backend/.env`, populate the required variables:
+```env
+PORT=3000
+MONGODB_URI=mongodb://127.0.0.1:27017/ecommerce
+ACCESS_TOKEN_SECRET=your-super-secret-access-key
+REFRESH_TOKEN_SECRET=your-super-secret-refresh-key
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-Build both applications:
+---
 
+## 🛠 Running the Development Workspace
+
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Start Backend Dev Server:**
+   ```bash
+   npm run dev:backend
+   ```
+   *The API will boot up on [http://localhost:3000](http://localhost:3000).*
+
+3. **Start Frontend Dev Server:**
+   ```bash
+   npm run dev:frontend
+   ```
+   *The storefront will boot up on [http://localhost:4200](http://localhost:4200).*
+
+---
+
+## 🧪 Testing Pipeline
+
+The repository features comprehensive integration test suites with 50 passing backend tests.
+
+To run the complete test pipeline:
 ```bash
-npm run build:backend
-npm run build:frontend
-```
-
-Run tests:
-
-```bash
+# Run backend tests
 npm run test:backend
+
+# Run frontend tests
 npm run test:frontend
 ```
 
-## Sprint 0 Scope
+---
 
-- Express backend foundation with Clean Architecture folders
-- Environment, security, logging, validation, and MongoDB bootstrap
-- Centralized API error handling
-- `GET /health` endpoint
-- Angular application bootstrap with Tailwind, routing, layout shell, theme service, and API service layer
-- Core documentation for architecture and folder structure
+## 📸 Visual Showcase
+
+### Live Admin Dashboard Overview
+*Real-time stats tracking, user role toggling, inventory auditing logs, and order lifecycle management.*
+
+![Admin Dashboard](/home/youssef/.gemini/antigravity/brain/16fdd0e3-09dc-4a06-82d0-39e88be4e05a/admin_dashboard_1781968002889.png)

@@ -25,4 +25,6 @@ export const env = {
   brevoApiKey: process.env.BREVO_API_KEY ?? '',
   brevoSenderEmail: process.env.BREVO_SENDER_EMAIL ?? 'no-reply@example.com',
   brevoSenderName: process.env.BREVO_SENDER_NAME ?? 'E-Commerce Platform',
+  stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? 'sk_test_mock',
+  stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? 'whsec_mock',
 };

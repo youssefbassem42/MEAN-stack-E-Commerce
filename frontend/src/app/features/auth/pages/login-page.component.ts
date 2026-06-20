@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -78,6 +78,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class LoginPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly loading = signal(false);
   readonly error = signal('');
@@ -99,6 +100,7 @@ export class LoginPageComponent {
     this.authService.login(this.form.getRawValue()).subscribe({
       next: () => {
         this.loading.set(false);
+        this.router.navigate(['/']);
       },
       error: (err) => {
         this.loading.set(false);

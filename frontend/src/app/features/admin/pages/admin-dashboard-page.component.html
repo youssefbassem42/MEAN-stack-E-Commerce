@@ -1,0 +1,374 @@
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-800">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Admin Administration Panel</h1>
+      <p class="text-slate-500 dark:text-slate-400 mt-1">Manage users, catalog products, orders, and monitor real-time stock levels.</p>
+    </div>
+    
+    <!-- Tab Controls -->
+    <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
+      <button 
+        (click)="setTab('stats')"
+        [class]="currentTab() === 'stats' ? 'btn--primary' : 'btn--secondary'"
+        type="button">
+        Dashboard Stats
+      </button>
+      <button 
+        (click)="setTab('products')"
+        [class]="currentTab() === 'products' ? 'btn--primary' : 'btn--secondary'"
+        type="button">
+        Products Catalog
+      </button>
+      <button 
+        (click)="setTab('orders')"
+        [class]="currentTab() === 'orders' ? 'btn--primary' : 'btn--secondary'"
+        type="button">
+        Orders Lifecycle
+      </button>
+      <button 
+        (click)="setTab('users')"
+        [class]="currentTab() === 'users' ? 'btn--primary' : 'btn--secondary'"
+        type="button">
+        Users Management
+      </button>
+      <button 
+        (click)="setTab('inventory')"
+        [class]="currentTab() === 'inventory' ? 'btn--primary' : 'btn--secondary'"
+        type="button">
+        Inventory Logs
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="error()" class="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/30 flex items-center justify-between">
+    <span>{{ error() }}</span>
+    <button (click)="error.set('')" class="text-red-700 dark:text-red-400 hover:opacity-75 font-semibold">&times;</button>
+  </div>
+
+  <div *ngIf="successMessage()" class="mb-6 p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-700 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900/30 flex items-center justify-between">
+    <span>{{ successMessage() }}</span>
+    <button (click)="successMessage.set('')" class="text-emerald-700 dark:text-emerald-400 hover:opacity-75 font-semibold">&times;</button>
+  </div>
+
+  <!-- Main Content Areas -->
+  <div [class.opacity-50]="loading()" class="transition-opacity duration-200">
+    
+    <!-- ── TAB: STATS ────────────────────────────────────────── -->
+    <div *ngIf="currentTab() === 'stats'">
+      <div *ngIf="stats() as s" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Stat Card 1 -->
+        <div class="dashboard-card p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Users</span>
+            <h2 class="text-4xl font-extrabold text-slate-900 dark:text-white mt-2">{{ s.totalUsers }}</h2>
+          </div>
+          <div class="mt-4 text-xs text-slate-400">Registered platform accounts</div>
+        </div>
+
+        <!-- Stat Card 2 -->
+        <div class="dashboard-card p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Orders</span>
+            <h2 class="text-4xl font-extrabold text-slate-900 dark:text-white mt-2">{{ s.totalOrders }}</h2>
+          </div>
+          <div class="mt-4 text-xs text-slate-400">Total customer orders placed</div>
+        </div>
+
+        <!-- Stat Card 3 -->
+        <div class="dashboard-card p-6 flex flex-col justify-between">
+          <div>
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Platform Revenue</span>
+            <h2 class="text-4xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2">${{ s.revenue | number:'1.2-2' }}</h2>
+          </div>
+          <div class="mt-4 text-xs text-slate-400">Paid/delivered order value</div>
+        </div>
+
+        <!-- Stat Card 4 -->
+        <div class="dashboard-card p-6 flex flex-col justify-between" [class.border-red-400]="s.lowStock > 0">
+          <div>
+            <span class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Low Stock Products</span>
+            <h2 class="text-4xl font-extrabold mt-2" [class.text-red-600]="s.lowStock > 0" [class.text-slate-900]="s.lowStock === 0" [class.dark:text-white]="s.lowStock === 0">{{ s.lowStock }}</h2>
+          </div>
+          <div class="mt-4 text-xs text-red-500 font-semibold" *ngIf="s.lowStock > 0">Stock level is 5 units or below!</div>
+          <div class="mt-4 text-xs text-slate-400" *ngIf="s.lowStock === 0">All catalog items fully stocked</div>
+        </div>
+
+      </div>
+      <div *ngIf="!stats() && !loading()" class="text-center py-12 text-slate-500">
+        No stats loaded.
+      </div>
+    </div>
+
+    <!-- ── TAB: PRODUCTS ────────────────────────────────────── -->
+    <div *ngIf="currentTab() === 'products'">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold text-slate-950 dark:text-white">Product Catalog ({{ products().length }})</h3>
+        <button (click)="openAddProductModal()" class="btn--primary" type="button">Add New Product</button>
+      </div>
+
+      <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-left text-sm">
+          <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 font-semibold">
+            <tr>
+              <th class="p-4">Product Info</th>
+              <th class="p-4">Category</th>
+              <th class="p-4">Price</th>
+              <th class="p-4">Stock</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-200">
+            <tr *ngFor="let prod of products()" class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
+              <td class="p-4 flex items-center gap-3">
+                <img 
+                  [src]="prod.images && prod.images.length ? prod.images[0] : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&q=80&w=80'" 
+                  class="w-12 h-12 object-contain bg-slate-50 dark:bg-slate-950 rounded border border-slate-100 dark:border-slate-800"
+                  alt="">
+                <div>
+                  <span class="font-bold block">{{ prod.title }}</span>
+                  <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">{{ prod.slug }}</span>
+                </div>
+              </td>
+              <td class="p-4 text-slate-600 dark:text-slate-400">
+                {{ getCategoryName(prod.categoryId) }}
+              </td>
+              <td class="p-4 font-bold">${{ prod.price | number:'1.2-2' }}</td>
+              <td class="p-4">
+                <span class="px-2.5 py-0.5 rounded text-xs font-semibold" 
+                  [class.bg-red-50]="prod.stock <= 5" [class.text-red-700]="prod.stock <= 5" [class.dark:bg-red-950/20]="prod.stock <= 5" [class.dark:text-red-400]="prod.stock <= 5"
+                  [class.bg-emerald-50]="prod.stock > 5" [class.text-emerald-700]="prod.stock > 5" [class.dark:bg-emerald-950/20]="prod.stock > 5" [class.dark:text-emerald-400]="prod.stock > 5">
+                  {{ prod.stock }} units
+                </span>
+              </td>
+              <td class="p-4 text-right">
+                <div class="inline-flex gap-2">
+                  <button (click)="openEditProductModal(prod)" class="btn--secondary !py-1 !px-2.5 text-xs" type="button">Edit</button>
+                  <button (click)="deleteProduct(prod._id)" class="btn--secondary !py-1 !px-2.5 text-xs !text-red-500 !border-red-200 hover:!bg-red-50 hover:!border-red-500" type="button">Delete</button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="products().length === 0 && !loading()">
+              <td colspan="5" class="text-center p-8 text-slate-400">No products found in the catalog.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TAB: ORDERS ──────────────────────────────────────── -->
+    <div *ngIf="currentTab() === 'orders'">
+      <h3 class="text-xl font-bold text-slate-950 dark:text-white mb-6">Customer Orders ({{ orders().length }})</h3>
+
+      <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-left text-sm">
+          <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 font-semibold">
+            <tr>
+              <th class="p-4">Order ID</th>
+              <th class="p-4">Customer</th>
+              <th class="p-4">Items / Qty</th>
+              <th class="p-4">Total</th>
+              <th class="p-4">Shipping</th>
+              <th class="p-4">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-200">
+            <tr *ngFor="let order of orders()" class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
+              <td class="p-4 font-mono font-bold text-xs">{{ order._id }}</td>
+              <td class="p-4">
+                <span class="block font-semibold" *ngIf="order.userId">{{ order.userId.firstName }} {{ order.userId.lastName }}</span>
+                <span class="text-xs text-slate-400 block" *ngIf="order.userId">{{ order.userId.email }}</span>
+                <span class="text-slate-400 text-xs italic" *ngIf="!order.userId">Deleted User</span>
+              </td>
+              <td class="p-4">
+                <div class="text-xs max-w-xs space-y-0.5">
+                  <div *ngFor="let item of order.items">
+                    <span class="font-medium" *ngIf="item.productId">{{ item.productId.title }}</span>
+                    <span class="font-medium text-slate-400 italic" *ngIf="!item.productId">Unknown Item</span>
+                    <span class="text-slate-400 ml-1">x {{ item.quantity }}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="p-4 font-bold text-indigo-600 dark:text-indigo-400">${{ order.grandTotal | number:'1.2-2' }}</td>
+              <td class="p-4">
+                <span class="block text-xs font-semibold uppercase">{{ order.shippingMethod }}</span>
+                <span class="text-xs text-slate-400">${{ order.shipping | number:'1.2-2' }} fee</span>
+              </td>
+              <td class="p-4">
+                <select 
+                  [value]="order.status"
+                  (change)="updateOrderStatus(order._id, $event)"
+                  [class]="getStatusClass(order.status)"
+                  class="rounded px-2.5 py-1 text-xs font-bold bg-transparent outline-none cursor-pointer border">
+                  <option value="pending" class="bg-white text-slate-900 dark:bg-slate-950 dark:text-white">pending</option>
+                  <option value="paid" class="bg-white text-slate-900 dark:bg-slate-950 dark:text-white">paid</option>
+                  <option value="packed" class="bg-white text-slate-900 dark:bg-slate-950 dark:text-white">packed</option>
+                  <option value="shipped" class="bg-white text-slate-900 dark:bg-slate-950 dark:text-white">shipped</option>
+                  <option value="delivered" class="bg-white text-slate-900 dark:bg-slate-950 dark:text-white">delivered</option>
+                  <option value="cancelled" class="bg-white text-slate-900 dark:bg-slate-950 dark:text-white">cancelled</option>
+                  <option value="failed" class="bg-white text-slate-900 dark:bg-slate-950 dark:text-white">failed</option>
+                </select>
+              </td>
+            </tr>
+            <tr *ngIf="orders().length === 0 && !loading()">
+              <td colspan="6" class="text-center p-8 text-slate-400">No orders found on the platform.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TAB: USERS ───────────────────────────────────────── -->
+    <div *ngIf="currentTab() === 'users'">
+      <h3 class="text-xl font-bold text-slate-950 dark:text-white mb-6">User Accounts ({{ users().length }})</h3>
+
+      <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-left text-sm">
+          <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 font-semibold">
+            <tr>
+              <th class="p-4">User Details</th>
+              <th class="p-4">Email</th>
+              <th class="p-4">Privileges</th>
+              <th class="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-200">
+            <tr *ngFor="let u of users()" class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
+              <td class="p-4 font-semibold">{{ u.firstName }} {{ u.lastName }}</td>
+              <td class="p-4 font-mono text-xs">{{ u.email }}</td>
+              <td class="p-4">
+                <span class="px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider"
+                  [class.bg-indigo-100]="u.role === 'admin'" [class.text-indigo-800]="u.role === 'admin'" [class.dark:bg-indigo-950/30]="u.role === 'admin'" [class.dark:text-indigo-400]="u.role === 'admin'"
+                  [class.bg-slate-100]="u.role !== 'admin'" [class.text-slate-800]="u.role !== 'admin'" [class.dark:bg-slate-800/40]="u.role !== 'admin'" [class.dark:text-slate-400]="u.role !== 'admin'">
+                  {{ u.role || 'user' }}
+                </span>
+              </td>
+              <td class="p-4 text-right">
+                <button 
+                  (click)="toggleUserRole(u)" 
+                  class="btn--secondary !py-1 !px-2.5 text-xs" 
+                  type="button">
+                  Toggle Role
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="users().length === 0 && !loading()">
+              <td colspan="4" class="text-center p-8 text-slate-400">No user accounts found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TAB: INVENTORY LOGS ───────────────────────────────── -->
+    <div *ngIf="currentTab() === 'inventory'">
+      <h3 class="text-xl font-bold text-slate-950 dark:text-white mb-6">Inventory Audit Logs ({{ inventoryLogs().length }})</h3>
+
+      <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-left text-sm">
+          <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-300 font-semibold">
+            <tr>
+              <th class="p-4">Date & Time</th>
+              <th class="p-4">Product Catalog Title</th>
+              <th class="p-4">Action Type</th>
+              <th class="p-4">Quantity Adjustment</th>
+              <th class="p-4">Reference</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-200">
+            <tr *ngFor="let log of inventoryLogs()" class="hover:bg-slate-50/50 dark:hover:bg-slate-900/30">
+              <td class="p-4 text-slate-500 dark:text-slate-400 text-xs">{{ log.createdAt | date:'medium' }}</td>
+              <td class="p-4">
+                <span class="font-semibold block" *ngIf="log.productId">{{ log.productId.title }}</span>
+                <span class="text-slate-400 italic text-xs block" *ngIf="!log.productId">Deleted Product</span>
+              </td>
+              <td class="p-4">
+                <span class="px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wider"
+                  [class.bg-red-50]="log.type === 'purchase'" [class.text-red-700]="log.type === 'purchase'" [class.dark:bg-red-950/20]="log.type === 'purchase'" [class.dark:text-red-400]="log.type === 'purchase'"
+                  [class.bg-emerald-50]="log.type === 'cancel'" [class.text-emerald-700]="log.type === 'cancel'" [class.dark:bg-emerald-950/20]="log.type === 'cancel'" [class.dark:text-emerald-400]="log.type === 'cancel'"
+                  [class.bg-amber-50]="log.type === 'restock'" [class.text-amber-700]="log.type === 'restock'" [class.dark:bg-amber-950/20]="log.type === 'restock'" [class.dark:text-amber-400]="log.type === 'restock'">
+                  {{ log.type }}
+                </span>
+              </td>
+              <td class="p-4 font-mono font-bold" [class.text-red-500]="log.quantity < 0" [class.text-emerald-500]="log.quantity > 0">
+                {{ log.quantity > 0 ? '+' : '' }}{{ log.quantity }}
+              </td>
+              <td class="p-4 text-xs font-mono">
+                <span *ngIf="log.referenceId">Order: {{ log.referenceId._id }}</span>
+                <span class="text-slate-400" *ngIf="!log.referenceId">-</span>
+              </td>
+            </tr>
+            <tr *ngIf="inventoryLogs().length === 0 && !loading()">
+              <td colspan="5" class="text-center p-8 text-slate-400">No inventory operations logged.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── PRODUCT ADD/EDIT MODAL ─────────────────────────────── -->
+<div *ngIf="showProductModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm">
+  <div class="glass-card w-full max-w-lg rounded-xl overflow-hidden shadow-xl animate-in fade-in zoom-in duration-200">
+    <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white">
+        {{ editingProduct() ? 'Edit Product Parameters' : 'Add New Catalog Item' }}
+      </h3>
+      <button (click)="closeProductModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white font-bold text-2xl" type="button">&times;</button>
+    </div>
+
+    <form [formGroup]="productForm" (ngSubmit)="saveProduct()" class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Product Title *</label>
+        <input type="text" formControlName="title" class="field-input w-full" placeholder="e.g. Wireless Smart Keyboard">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">URL Slug (Optional)</label>
+        <input type="text" formControlName="slug" class="field-input w-full" placeholder="e.g. smart-keyboard">
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Price ($) *</label>
+          <input type="number" formControlName="price" class="field-input w-full" placeholder="29.99">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Initial Stock *</label>
+          <input type="number" formControlName="stock" class="field-input w-full" placeholder="10">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Category *</label>
+        <select formControlName="categoryId" class="filter-select w-full">
+          <option value="" disabled selected>Select category...</option>
+          <option *ngFor="let cat of categories()" [value]="cat.id">{{ cat.name }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Image URLs (comma-separated)</label>
+        <input type="text" formControlName="imageString" class="field-input w-full" placeholder="https://url-1.jpg, https://url-2.jpg">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Tags (comma-separated)</label>
+        <input type="text" formControlName="tagsString" class="field-input w-full" placeholder="electronics, gadget, smart">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold uppercase text-slate-400 dark:text-slate-500 mb-1">Description *</label>
+        <textarea formControlName="description" class="field-input w-full min-h-[100px]" placeholder="Detailed product specifications..."></textarea>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+        <button (click)="closeProductModal()" type="button" class="btn--secondary">Cancel</button>
+        <button type="submit" class="btn--primary" [disabled]="loading()">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>

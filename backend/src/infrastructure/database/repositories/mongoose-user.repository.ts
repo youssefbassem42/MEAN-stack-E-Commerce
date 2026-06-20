@@ -8,6 +8,7 @@ type UserDocument = {
   passwordHash: string;
   firstName: string;
   lastName: string;
+  role?: string;
   isEmailVerified: boolean;
   refreshTokenHash?: string | null;
   createdAt: Date;
@@ -20,6 +21,7 @@ const toEntity = (document: UserDocument): UserEntity => ({
   passwordHash: document.passwordHash,
   firstName: document.firstName,
   lastName: document.lastName,
+  role: document.role,
   isEmailVerified: document.isEmailVerified,
   refreshTokenHash: document.refreshTokenHash ?? null,
   createdAt: document.createdAt,

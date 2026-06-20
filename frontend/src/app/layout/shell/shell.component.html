@@ -1,22 +1,52 @@
 <div class="min-h-screen bg-[var(--color-surface)] text-[var(--color-text)] transition-colors duration-300">
-  <header class="border-b border-black/10 bg-white/70 backdrop-blur dark:border-white/10 dark:bg-slate-950/70">
+  <header class="bg-[var(--color-header)] border-b border-white/5 sticky top-0 z-50">
     <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-      <a routerLink="/" class="flex items-center gap-3 text-sm font-semibold uppercase tracking-[0.3em] text-[var(--color-brand)]">
-        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-brand)] text-white shadow-lg shadow-orange-400/30">EC</span>
-        Commerce
+      <a routerLink="/" class="font-bold text-2xl tracking-tight text-white hover:text-[var(--color-brand)] transition duration-200">
+        Z-A
       </a>
 
-      <div class="hidden items-center gap-6 md:flex">
-        <a routerLink="/" class="text-sm font-semibold transition hover:text-[var(--color-brand)]">Home</a>
-        <a routerLink="/products" class="text-sm font-semibold transition hover:text-[var(--color-brand)]">Shop Catalog</a>
+      <div class="hidden items-center gap-8 md:flex">
+        <a routerLink="/" class="text-sm font-medium text-slate-300 hover:text-[var(--color-brand)] transition duration-200">Home</a>
+        <a routerLink="/products" class="text-sm font-medium text-slate-300 hover:text-[var(--color-brand)] transition duration-200">Shop Catalog</a>
+        @if (authService.isLoggedIn()) {
+          <a routerLink="/orders" class="text-sm font-medium text-slate-300 hover:text-[var(--color-brand)] transition duration-200">My Orders</a>
+        }
+        @if (authService.isLoggedIn() && authService.user()?.role === 'admin') {
+          <a routerLink="/admin" class="text-sm font-medium text-indigo-400 hover:text-[var(--color-brand)] transition duration-200">Admin Panel</a>
+        }
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-4">
+        <a
+          routerLink="/cart"
+          id="nav-cart"
+          class="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-slate-300 hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] hover:bg-white/5 transition duration-200"
+          aria-label="Shopping Cart"
+        >
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          @if (authService.isLoggedIn() && cartService.itemCount() > 0) {
+            <span class="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-brand)] text-[10px] font-bold text-white">
+              {{ cartService.itemCount() }}
+            </span>
+          }
+        </a>
+        <a
+          routerLink="/wishlist"
+          id="nav-wishlist"
+          class="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-slate-300 hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] hover:bg-white/5 transition duration-200"
+          aria-label="My Wishlist"
+        >
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </a>
         @if (authService.isLoggedIn()) {
           <a
             routerLink="/profile"
             id="nav-profile"
-            class="hidden rounded-full border border-black/10 px-4 py-2 text-sm font-medium transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] dark:border-white/10 md:inline-flex"
+            class="hidden rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] hover:bg-white/5 transition duration-200 md:inline-flex"
           >
             My Profile
           </a>
@@ -24,14 +54,14 @@
           <a
             routerLink="/auth/login"
             id="nav-login"
-            class="hidden rounded-full border border-black/10 px-4 py-2 text-sm font-medium transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] dark:border-white/10 md:inline-flex"
+            class="hidden rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] hover:bg-white/5 transition duration-200 md:inline-flex"
           >
             Sign In
           </a>
           <a
             routerLink="/auth/register"
             id="nav-register"
-            class="hidden rounded-full bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white shadow-md shadow-orange-400/25 transition hover:opacity-90 md:inline-flex"
+            class="hidden rounded-lg bg-[var(--color-brand)] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-orange-500/10 hover:bg-[#ff8838] transition duration-200 md:inline-flex"
           >
             Register
           </a>
@@ -39,7 +69,7 @@
         <button
           type="button"
           id="theme-toggle"
-          class="rounded-full border border-black/10 px-4 py-2 text-sm font-medium transition hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] dark:border-white/10"
+          class="rounded-lg border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 hover:border-[var(--color-brand)] hover:text-[var(--color-brand)] hover:bg-white/5 transition duration-200"
           (click)="themeService.toggleTheme()"
         >
           {{ themeService.mode() === 'dark' ? '☀ Light' : '☾ Dark' }}
@@ -48,19 +78,28 @@
     </div>
   </header>
 
-  <main>
+  <main class="py-8">
     <router-outlet />
   </main>
 
-  <footer class="border-t border-black/10 bg-white/80 dark:border-white/10 dark:bg-slate-950/80">
-    <div class="mx-auto flex w-full max-w-6xl flex-col gap-3 px-6 py-6 text-sm text-slate-500 md:flex-row md:items-center md:justify-between dark:text-slate-400">
-      <p>© 2026 Commerce. All rights reserved.</p>
-      <div class="flex gap-4">
-        <a routerLink="/" class="hover:text-[var(--color-brand)] transition">Home</a>
-        <a routerLink="/products" class="hover:text-[var(--color-brand)] transition">Shop Catalog</a>
-        <a routerLink="/auth/login" class="hover:text-[var(--color-brand)] transition">Sign In</a>
-        <a routerLink="/auth/register" class="hover:text-[var(--color-brand)] transition">Register</a>
+  <footer class="bg-[var(--color-header)] border-t border-white/5 text-slate-400">
+    <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-12 text-sm md:flex-row md:items-center md:justify-between">
+      <div>
+        <span class="font-bold text-lg text-white tracking-tight">Z-A</span>
+        <p class="mt-2 text-slate-400 max-w-xs">Elevating the everyday through exceptional design and uncompromising quality.</p>
       </div>
+      <div class="flex flex-wrap gap-8">
+        <a routerLink="/" class="hover:text-[var(--color-brand)] transition duration-200">Home</a>
+        <a routerLink="/products" class="hover:text-[var(--color-brand)] transition duration-200">Shop Catalog</a>
+        @if (authService.isLoggedIn()) {
+          <a routerLink="/orders" class="hover:text-[var(--color-brand)] transition duration-200">My Orders</a>
+        }
+        <a routerLink="/auth/login" class="hover:text-[var(--color-brand)] transition duration-200">Sign In</a>
+        <a routerLink="/auth/register" class="hover:text-[var(--color-brand)] transition duration-200">Register</a>
+      </div>
+    </div>
+    <div class="border-t border-white/5 py-6 text-center text-xs text-slate-500">
+      © 2026 Z-A Marketplace. All rights reserved.
     </div>
   </footer>
 </div>

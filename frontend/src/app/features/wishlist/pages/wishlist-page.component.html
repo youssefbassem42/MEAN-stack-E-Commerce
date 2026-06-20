@@ -1,0 +1,102 @@
+<div class="wishlist-page">
+  <div class="mx-auto max-w-6xl px-6 py-12">
+    
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-10">
+      <div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">My Wishlist</h1>
+        <p class="text-slate-500 mt-2">Products you saved for later purchase.</p>
+      </div>
+
+      @if (products.length > 0) {
+        <button
+          type="button"
+          (click)="moveAllToCart()"
+          [disabled]="loading()"
+          class="rounded-full border border-[var(--color-brand)] px-6 py-2.5 text-sm font-bold text-[var(--color-brand)] transition hover:bg-[var(--color-brand)] hover:text-white disabled:opacity-50"
+        >
+          Move All to Cart
+        </button>
+      }
+    </header>
+
+    @if (error()) {
+      <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+        {{ error() }}
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (products.length === 0) {
+      <div class="rounded-3xl border border-dashed border-black/10 py-20 text-center dark:border-white/10">
+        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-900 text-slate-400 mb-6">
+          <svg class="h-8 w-8 text-red-500 fill-current" viewBox="0 0 24 24">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200">Your Wishlist is Empty</h2>
+        <p class="text-slate-500 mt-2 max-w-sm mx-auto">Keep track of products you love. They will show up here to easily find or move to your shopping cart.</p>
+        <a routerLink="/products" class="mt-6 inline-block rounded-full bg-[var(--color-brand)] px-8 py-3 text-sm font-bold text-white shadow-lg shadow-orange-400/25 transition hover:opacity-90">Browse Products</a>
+      </div>
+    } @else {
+      
+      <!-- Grid Layout -->
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+        @for (prod of products; track prod._id) {
+          <div class="relative flex flex-col justify-between rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur dark:border-white/10 dark:bg-slate-900/60 shadow-sm transition hover:shadow-md">
+            
+            <!-- Remove Button -->
+            <button
+              type="button"
+              (click)="removeFromWishlist(prod._id)"
+              [disabled]="loading()"
+              class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 dark:bg-slate-950/80 border border-black/5 dark:border-white/5 text-slate-400 hover:text-red-500 transition shadow-sm"
+              aria-label="Remove item"
+            >
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+
+            <!-- Product Card Info -->
+            <div>
+              <!-- Image Container -->
+              <div class="h-48 overflow-hidden rounded-2xl border border-black/5 bg-slate-50 dark:border-white/5 dark:bg-slate-950 mb-4">
+                @if (prod.images && prod.images.length > 0) {
+                  <img [src]="prod.images[0]" [alt]="prod.title" class="h-full w-full object-cover transition duration-300 hover:scale-105" />
+                } @else {
+                  <div class="flex h-full w-full items-center justify-center text-slate-300">
+                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </div>
+                }
+              </div>
+
+              <!-- Product Info -->
+              <a [routerLink]="['/products', prod.slug]" class="block text-lg font-bold text-slate-800 dark:text-slate-100 hover:text-[var(--color-brand)] transition">
+                {{ prod.title }}
+              </a>
+              <span class="block text-sm text-slate-400 mt-0.5 uppercase tracking-wider font-semibold">Premium Catalog</span>
+            </div>
+
+            <!-- Price & Action CTA -->
+            <div class="mt-6 flex items-center justify-between gap-4 border-t border-black/5 dark:border-white/5 pt-4">
+              <span class="text-lg font-black text-slate-800 dark:text-white">{{ prod.price | currency }}</span>
+              
+              <button
+                type="button"
+                (click)="moveToCart(prod._id)"
+                [disabled]="loading() || prod.stock <= 0"
+                class="rounded-full bg-[var(--color-brand)] px-4 py-2 text-xs font-bold text-white shadow-md shadow-orange-400/20 transition hover:opacity-90 disabled:opacity-50"
+              >
+                {{ prod.stock > 0 ? 'Move to Cart' : 'Out of Stock' }}
+              </button>
+            </div>
+
+          </div>
+        }
+      </div>
+
+    }
+
+  </div>
+</div>

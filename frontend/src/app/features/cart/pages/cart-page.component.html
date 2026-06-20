@@ -1,0 +1,188 @@
+<div class="cart-page">
+  <div class="mx-auto max-w-6xl px-6 py-12">
+    
+    <header class="mb-10">
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">Shopping Cart</h1>
+      <p class="text-slate-500 mt-2">Manage your selected premium products and proceed to checkout.</p>
+    </header>
+
+    @if (error()) {
+      <div class="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+        {{ error() }}
+      </div>
+    }
+
+    <!-- ── EMPTY CART STATE ────────────────────────────────── -->
+    @if (!cart || cart.items.length === 0) {
+      <div class="rounded-3xl border border-dashed border-black/10 py-20 text-center dark:border-white/10">
+        <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-900 text-slate-400 mb-6">
+          <svg class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200">Your Cart is Empty</h2>
+        <p class="text-slate-500 mt-2 max-w-sm mx-auto">Looks like you haven't added any products to your cart yet. Explore our catalog to find amazing deals!</p>
+        <a routerLink="/products" class="mt-6 inline-block rounded-full bg-[var(--color-brand)] px-8 py-3 text-sm font-bold text-white shadow-lg shadow-orange-400/25 transition hover:opacity-90">Start Shopping</a>
+      </div>
+    } @else {
+      
+      <!-- ── CART LAYOUT GRID ────────────────────────────────── -->
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-12">
+        
+        <!-- Left: Items list -->
+        <div class="lg:col-span-8 flex flex-col gap-6">
+          
+          @for (item of cart.items; track item.productId._id) {
+            <div class="relative flex flex-col sm:flex-row items-center gap-6 rounded-3xl border border-black/10 bg-white/60 p-6 backdrop-blur dark:border-white/10 dark:bg-slate-900/60 shadow-sm transition hover:shadow-md">
+              
+              <!-- Item Image -->
+              <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl border border-black/5 bg-slate-50 dark:border-white/5 dark:bg-slate-950">
+                @if (item.productId.images && item.productId.images.length > 0) {
+                  <img [src]="item.productId.images[0]" [alt]="item.productId.title" class="h-full w-full object-cover" />
+                } @else {
+                  <div class="flex h-full w-full items-center justify-center text-slate-300">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </div>
+                }
+              </div>
+
+              <!-- Item info -->
+              <div class="flex-1 text-center sm:text-left">
+                <a [routerLink]="['/products', item.productId.slug]" class="text-lg font-bold text-slate-800 dark:text-slate-100 hover:text-[var(--color-brand)] transition">
+                  {{ item.productId.title }}
+                </a>
+                <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Premium Product</p>
+                <div class="mt-2 text-slate-500 font-medium text-sm">
+                  {{ item.productId.price | currency }} each
+                </div>
+              </div>
+
+              <!-- Controls: Qty Stepper & Price -->
+              <div class="flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
+                
+                <!-- Stepper -->
+                <div class="flex items-center gap-3 rounded-full border border-black/10 px-3 py-1.5 dark:border-white/10">
+                  <button
+                     type="button"
+                     (click)="decrementQuantity(item.productId._id, item.quantity)"
+                     [disabled]="item.quantity <= 1"
+                     class="h-7 w-7 rounded-full bg-slate-100 font-bold hover:bg-slate-200 transition disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                  >
+                     -
+                  </button>
+                  <span class="w-6 text-center font-bold text-sm">{{ item.quantity }}</span>
+                  <button
+                     type="button"
+                     (click)="incrementQuantity(item.productId._id, item.quantity, item.productId.stock)"
+                     [disabled]="item.quantity >= item.productId.stock"
+                     class="h-7 w-7 rounded-full bg-slate-100 font-bold hover:bg-slate-200 transition disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                  >
+                     +
+                  </button>
+                </div>
+
+                <!-- Subtotal Price -->
+                <div class="w-24 text-center sm:text-right font-black text-slate-800 dark:text-white">
+                  {{ (item.productId.price * item.quantity) | currency }}
+                </div>
+
+                <!-- Delete Button -->
+                <button
+                  type="button"
+                  (click)="removeItem(item.productId._id)"
+                  class="flex h-10 w-10 items-center justify-center rounded-full border border-red-100 text-red-500 hover:bg-red-50 hover:text-red-600 transition dark:border-red-950/30 dark:hover:bg-red-950/20"
+                  aria-label="Remove item"
+                >
+                  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+
+              </div>
+
+            </div>
+          }
+
+        </div>
+
+        <!-- Right: Order Summary card -->
+        <div class="lg:col-span-4">
+          <div class="sticky top-8 rounded-3xl border border-black/10 bg-slate-50/50 p-6 backdrop-blur dark:border-white/10 dark:bg-slate-900/50 flex flex-col gap-6">
+            
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white">Order Summary</h2>
+
+            <!-- Calculations Breakdown -->
+            <div class="flex flex-col gap-3 text-sm font-medium border-b border-black/10 pb-6 dark:border-white/10">
+              <div class="flex justify-between">
+                <span class="text-slate-500">Subtotal</span>
+                <span class="text-slate-800 dark:text-slate-200">{{ cart.subtotal | currency }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">VAT (15%)</span>
+                <span class="text-slate-800 dark:text-slate-200">{{ cart.vat | currency }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-500">Shipping</span>
+                <span class="text-slate-800 dark:text-slate-200">
+                  {{ cart.shipping > 0 ? (cart.shipping | currency) : 'Free' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Shipping Method Selection -->
+            <div>
+              <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Shipping Method</span>
+              <div class="grid grid-cols-2 gap-3">
+                <!-- COD Option -->
+                <button
+                  type="button"
+                  (click)="setShippingMethod('COD')"
+                  class="flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition duration-200"
+                  [class.border-[var(--color-brand)]]="cart.shippingMethod === 'COD'"
+                  [class.bg-[var(--color-brand)]/5]="cart.shippingMethod === 'COD'"
+                  [class.border-black/10]="cart.shippingMethod !== 'COD'"
+                  [class.dark:border-white/10]="cart.shippingMethod !== 'COD'"
+                >
+                  <span class="text-sm font-bold text-slate-800 dark:text-slate-200">COD</span>
+                  <span class="text-xs text-slate-400 mt-0.5">50 EGP fee</span>
+                </button>
+
+                <!-- CARD Option -->
+                <button
+                  type="button"
+                  (click)="setShippingMethod('CARD')"
+                  class="flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition duration-200"
+                  [class.border-[var(--color-brand)]]="cart.shippingMethod === 'CARD'"
+                  [class.bg-[var(--color-brand)]/5]="cart.shippingMethod === 'CARD'"
+                  [class.border-black/10]="cart.shippingMethod !== 'CARD'"
+                  [class.dark:border-white/10]="cart.shippingMethod !== 'CARD'"
+                >
+                  <span class="text-sm font-bold text-slate-800 dark:text-slate-200">Card</span>
+                  <span class="text-xs text-slate-400 mt-0.5">Free Shipping</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Grand Total -->
+            <div class="flex items-center justify-between pt-2">
+              <span class="text-base font-extrabold text-slate-900 dark:text-white">Grand Total</span>
+              <span class="text-2xl font-black text-[var(--color-brand)]">{{ cart.grandTotal | currency }}</span>
+            </div>
+
+            <!-- Checkout Action Button -->
+            <a
+              routerLink="/checkout"
+              class="w-full rounded-full bg-[var(--color-brand)] py-4 text-center text-sm font-bold text-white shadow-lg shadow-orange-400/25 transition hover:opacity-90 mt-2 block"
+            >
+              Proceed to Checkout
+            </a>
+
+          </div>
+        </div>
+
+      </div>
+
+    }
+
+  </div>
+</div>

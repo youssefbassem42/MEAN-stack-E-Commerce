@@ -29,16 +29,18 @@ interface LoginResult {
     email: string;
     firstName: string;
     lastName: string;
+    role: string;
   };
 }
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
-const serializeUser = (user: { id: string; email: string; firstName: string; lastName: string }) => ({
+const serializeUser = (user: { id: string; email: string; firstName: string; lastName: string; role?: string }) => ({
   id: user.id,
   email: user.email,
   firstName: user.firstName,
   lastName: user.lastName,
+  role: user.role || 'user',
 });
 
 export class AuthService {

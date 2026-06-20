@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body, param, query } from 'express-validator';
 import type { CatalogService } from '../../../application/services/catalog.service.js';
 import { validateRequest } from '../../../shared/middleware/validate-request.middleware.js';
+import { authenticate, adminOnly } from '../../../shared/middleware/authenticate.middleware.js';
 import { createCatalogController } from '../controllers/catalog.controller.js';
 
 const mongoId = (field: string) =>
@@ -23,6 +24,8 @@ export const createCatalogRouter = (catalogService: CatalogService) => {
 
   router.post(
     '/categories',
+    authenticate,
+    adminOnly,
     [
       body('name').isString().trim().isLength({ min: 1 }).withMessage('Category name is required.'),
       slugValidation,
@@ -33,6 +36,8 @@ export const createCatalogRouter = (catalogService: CatalogService) => {
 
   router.put(
     '/categories/:id',
+    authenticate,
+    adminOnly,
     [
       mongoId('id'),
       body('name').optional().isString().trim().isLength({ min: 1 }),
@@ -42,7 +47,7 @@ export const createCatalogRouter = (catalogService: CatalogService) => {
     controller.updateCategory,
   );
 
-  router.delete('/categories/:id', mongoId('id'), validateRequest, controller.deleteCategory);
+  router.delete('/categories/:id', authenticate, adminOnly, mongoId('id'), validateRequest, controller.deleteCategory);
 
   // ── Products ──────────────────────────────────────────────────
   router.get(
@@ -71,10 +76,12 @@ export const createCatalogRouter = (catalogService: CatalogService) => {
     controller.getProducts,
   );
 
-  router.get('/products/:id', mongoId('id'), validateRequest, controller.getProductById);
+  router.get('/products/:id', controller.getProductById);
 
   router.post(
     '/products',
+    authenticate,
+    adminOnly,
     [
       body('title').isString().trim().isLength({ min: 1 }).withMessage('Title is required.'),
       slugValidation,
@@ -93,6 +100,8 @@ export const createCatalogRouter = (catalogService: CatalogService) => {
 
   router.put(
     '/products/:id',
+    authenticate,
+    adminOnly,
     [
       mongoId('id'),
       body('title').optional().isString().trim().isLength({ min: 1 }),
@@ -110,7 +119,7 @@ export const createCatalogRouter = (catalogService: CatalogService) => {
     controller.updateProduct,
   );
 
-  router.delete('/products/:id', mongoId('id'), validateRequest, controller.deleteProduct);
+  router.delete('/products/:id', authenticate, adminOnly, mongoId('id'), validateRequest, controller.deleteProduct);
 
   return router;
 };

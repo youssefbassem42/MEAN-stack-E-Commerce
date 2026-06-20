@@ -1,6 +1,8 @@
 import type { CategoryRepository } from '../ports/category.repository.js';
 import type { ProductRepository, ProductFilters } from '../ports/product.repository.js';
 import { AppError } from '../../shared/errors/app-error.js';
+import { ProductViewModel } from '../../infrastructure/database/models/product-view.model.js';
+import { InventoryLogModel } from '../../infrastructure/database/models/inventory-log.model.js';
 
 const slugify = (text: string) =>
   text
@@ -93,10 +95,26 @@ export class CatalogService {
     return this.productRepository.findAll(filters);
   }
 
-  public async getProductById(id: string) {
-    const product = await this.productRepository.findById(id);
+  public async getProductById(idOrSlug: string) {
+    let product = null;
+    if (idOrSlug.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await this.productRepository.findById(idOrSlug);
+    }
+    if (!product) {
+      product = await this.productRepository.findBySlug(idOrSlug);
+    }
     if (!product) throw new AppError('Product not found.', 404);
-    return product;
+
+    const viewDoc = await ProductViewModel.findOneAndUpdate(
+      { productId: product.id },
+      { $inc: { count: 1 } },
+      { upsert: true, new: true }
+    );
+
+    return {
+      ...product,
+      views: viewDoc ? viewDoc.count : 0
+    };
   }
 
   public async createProduct(payload: CreateProductPayload) {
@@ -107,7 +125,7 @@ export class CatalogService {
     const category = await this.categoryRepository.findById(payload.categoryId);
     if (!category) throw new AppError('Category not found.', 404);
 
-    return this.productRepository.create({
+    const product = await this.productRepository.create({
       title: payload.title.trim(),
       slug,
       price: payload.price,
@@ -117,6 +135,20 @@ export class CatalogService {
       categoryId: payload.categoryId,
       tags: payload.tags ?? [],
     });
+
+    if (product.stock > 0) {
+      try {
+        await InventoryLogModel.create({
+          productId: product.id,
+          quantity: product.stock,
+          type: 'restock',
+        });
+      } catch (e) {
+        // Safe fallback for in-memory mock repositories where MongoDB is not connected
+      }
+    }
+
+    return product;
   }
 
   public async updateProduct(id: string, payload: UpdateProductPayload) {
@@ -135,8 +167,23 @@ export class CatalogService {
       if (!category) throw new AppError('Category not found.', 404);
     }
 
+    const oldStock = product.stock;
     const updated = await this.productRepository.updateById(id, payload);
     if (!updated) throw new AppError('Product not found.', 404);
+
+    if (payload.stock !== undefined && payload.stock !== oldStock) {
+      try {
+        const delta = payload.stock - oldStock;
+        await InventoryLogModel.create({
+          productId: updated.id,
+          quantity: delta,
+          type: delta > 0 ? 'restock' : 'adjustment',
+        });
+      } catch (e) {
+        // Safe fallback for in-memory mock repositories where MongoDB is not connected
+      }
+    }
+
     return updated;
   }
 

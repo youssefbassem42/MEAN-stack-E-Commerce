@@ -63,7 +63,11 @@ export const createApp = (options?: {
   app.use(cors({ origin: env.clientOrigin, credentials: true }));
   app.use(helmet());
   app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
-  app.use(express.json());
+  app.use(express.json({
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf;
+    }
+  }));
 
   app.use(createApiRouter(services.authService, services.profileService, services.catalogService));
 

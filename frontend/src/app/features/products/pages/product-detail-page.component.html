@@ -1,0 +1,320 @@
+<div class="product-detail-page">
+  <div class="mx-auto max-w-6xl px-6 py-8">
+    
+    <!-- ── BREADCRUMB / GO BACK ────────────────────────────── -->
+    <nav class="mb-8" aria-label="Breadcrumb">
+      <a routerLink="/products" class="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[var(--color-brand)] transition">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        Back to Catalog
+      </a>
+    </nav>
+
+    <!-- ── LOADING / ERROR STATES ──────────────────────────── -->
+    @if (loading()) {
+      <div class="flex flex-col items-center justify-center py-20">
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-[var(--color-brand)] border-t-transparent"></div>
+        <p class="mt-4 text-slate-500">Loading product details...</p>
+      </div>
+    } @else if (error()) {
+      <div class="mx-auto max-w-md text-center py-16">
+        <div class="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+          <h3 class="text-lg font-semibold">Error Loading Product</h3>
+          <p class="mt-2 text-sm">{{ error() }}</p>
+          <a routerLink="/products" class="mt-4 inline-block rounded-full bg-red-600 px-6 py-2 text-sm font-semibold text-white hover:bg-red-700 transition">Return to Shop</a>
+        </div>
+      </div>
+    } @else if (product(); as prod) {
+        <!-- ── MAIN PRODUCT GRID ────────────────────────────── -->
+        <div class="grid grid-cols-1 gap-12 lg:grid-cols-12">
+          
+          <!-- LEFT COLUMN: Image Gallery -->
+          <div class="lg:col-span-6">
+            <div class="sticky top-8 flex flex-col gap-4">
+              <!-- Main Image Display -->
+              <div class="relative overflow-hidden rounded-3xl border border-black/10 bg-slate-50 dark:border-white/10 dark:bg-slate-900 aspect-square">
+                @if (prod.images && prod.images.length > 0) {
+                  <img
+                    [src]="prod.images[activeImageIndex()]"
+                    [alt]="prod.title"
+                    class="h-full w-full object-cover transition-all duration-500 hover:scale-105"
+                  />
+                } @else {
+                  <div class="flex h-full w-full items-center justify-center text-slate-400">
+                    <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                  </div>
+                }
+
+                <!-- Tags / Badges overlay -->
+                <div class="absolute left-4 top-4 flex flex-col gap-2">
+                  @for (tag of prod.tags; track tag) {
+                    <span class="rounded-full bg-black/70 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white backdrop-blur">{{ tag }}</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Thumbnails Selector -->
+              @if (prod.images && prod.images.length > 1) {
+                <div class="flex gap-3 overflow-x-auto pb-2">
+                  @for (img of prod.images; track img; let idx = $index) {
+                    <button
+                      type="button"
+                      (click)="selectImage(idx)"
+                      class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition duration-200"
+                      [class.border-[var(--color-brand)]]="activeImageIndex() === idx"
+                      [class.border-transparent]="activeImageIndex() !== idx"
+                    >
+                      <img [src]="img" [alt]="prod.title" class="h-full w-full object-cover" />
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN: Product Details Info -->
+          <div class="lg:col-span-6">
+            <div class="flex flex-col gap-6">
+              
+              <!-- Category and Rating summary -->
+              <div class="flex items-center justify-between gap-4">
+                <span class="text-sm font-semibold uppercase tracking-wider text-[var(--color-brand)]">Premium Product</span>
+                
+                @if (reviews().length > 0) {
+                  <div class="flex items-center gap-1">
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200">{{ averageRating }}</span>
+                    <div class="flex text-amber-400">
+                      @for (star of [1,2,3,4,5]; track star) {
+                        <svg class="h-4 w-4" [class.fill-current]="star <= averageRating" [class.stroke-current]="star > averageRating" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.367 1.25.59 1.819l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.17 0l-3.971 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.98 9.41c-.777-.569-.371-1.819.59-1.819h4.907a1 1 0 00.95-.69l1.52-4.674z"/></svg>
+                      }
+                    </div>
+                    <span class="text-xs text-slate-400">({{ reviews().length }} reviews)</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Product Title -->
+              <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{{ prod.title }}</h1>
+
+              <!-- Sleek Active Viewers badge with pulse animation -->
+              <div class="flex flex-wrap items-center gap-4">
+                <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400">
+                  <span class="relative flex h-2 w-2">
+                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                  </span>
+                  {{ activeViewers() }} active {{ activeViewers() === 1 ? 'viewer' : 'viewers' }} right now
+                </span>
+
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  👁 {{ prod.views ?? 0 }} total page views
+                </span>
+              </div>
+
+              <!-- Price & Stock Status -->
+              <div class="flex items-center justify-between border-y border-black/10 py-4 dark:border-white/10">
+                <div>
+                  <span class="text-3xl font-black text-[var(--color-brand)]">{{ prod.price | currency }}</span>
+                  <p class="text-xs text-slate-400 mt-0.5">VAT inclusive where applicable</p>
+                </div>
+                <div class="text-right">
+                  @if (prod.stock > 0) {
+                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-950/30 dark:text-green-400">In Stock ({{ prod.stock }} left)</span>
+                  } @else {
+                    <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700 dark:bg-red-950/30 dark:text-red-400">Out of Stock</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Description -->
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Description</h3>
+                <p class="mt-2 text-base leading-relaxed text-slate-600 dark:text-slate-300">{{ prod.description }}</p>
+              </div>
+
+              <!-- CTA / Shopping Actions -->
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <!-- Quantity selector -->
+                <div class="flex items-center justify-between rounded-full border border-black/10 px-4 py-2 dark:border-white/10 sm:justify-start sm:gap-4">
+                  <span class="text-sm font-semibold text-slate-500">Qty</span>
+                  <div class="flex items-center gap-3">
+                    <button
+                      type="button"
+                      (click)="decrementQuantity()"
+                      [disabled]="quantity() <= 1"
+                      class="h-8 w-8 rounded-full bg-slate-100 font-bold hover:bg-slate-200 transition disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                    >
+                      -
+                    </button>
+                    <span class="w-6 text-center font-bold">{{ quantity() }}</span>
+                    <button
+                      type="button"
+                      (click)="incrementQuantity()"
+                      [disabled]="quantity() >= prod.stock"
+                      class="h-8 w-8 rounded-full bg-slate-100 font-bold hover:bg-slate-200 transition disabled:opacity-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Add to Cart CTA -->
+                <button
+                  type="button"
+                  [disabled]="prod.stock <= 0"
+                  (click)="addToCart()"
+                  class="flex-1 rounded-full bg-[var(--color-brand)] py-4 text-center text-sm font-bold text-white shadow-lg shadow-orange-400/25 transition hover:opacity-90 disabled:opacity-50"
+                >
+                  Add to Cart
+                </button>
+
+                <!-- Floating Wishlist Button -->
+                <button
+                  type="button"
+                  (click)="toggleWishlist()"
+                  class="flex h-14 w-14 items-center justify-center rounded-full border border-black/10 transition hover:bg-slate-50 dark:border-white/10 dark:hover:bg-slate-900"
+                  [attr.aria-label]="wishlisted() ? 'Remove from wishlist' : 'Add to wishlist'"
+                >
+                  <svg
+                    class="h-6 w-6 transition duration-300"
+                    [class.text-red-500]="wishlisted()"
+                    [class.fill-current]="wishlisted()"
+                    [class.text-slate-400]="!wishlisted()"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── REVIEWS SECTION ──────────────────────────────── -->
+        <section class="mt-16 border-t border-black/10 pt-12 dark:border-white/10">
+          <div class="grid grid-cols-1 gap-12 lg:grid-cols-12">
+            
+            <!-- Left: Reviews Summary & Write Form -->
+            <div class="lg:col-span-5">
+              <div class="sticky top-8 flex flex-col gap-6">
+                <div>
+                  <h2 class="text-2xl font-bold text-slate-900 dark:text-white">Customer Reviews</h2>
+                  <p class="text-sm text-slate-500 mt-1">Read reviews left by verified buyers of this product.</p>
+                </div>
+
+                <!-- Interactive Rating Form -->
+                <div class="rounded-3xl border border-black/10 bg-white/50 p-6 backdrop-blur dark:border-white/10 dark:bg-slate-900/50">
+                  <h3 class="font-bold text-slate-800 dark:text-slate-100">Write a Review</h3>
+
+                  @if (!isLoggedIn) {
+                    <div class="mt-4 rounded-xl bg-slate-50 p-4 text-center dark:bg-slate-950/30">
+                      <p class="text-sm text-slate-500">You must be logged in to submit a review.</p>
+                      <a routerLink="/auth/login" class="mt-3 inline-block rounded-full bg-[var(--color-brand)] px-4 py-1.5 text-xs font-bold text-white transition hover:opacity-90">Sign In</a>
+                    </div>
+                  } @else {
+                    <form (ngSubmit)="submitReview()" class="mt-4 flex flex-col gap-4">
+                      
+                      <!-- Rating stars picker -->
+                      <div>
+                        <span class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Your Rating</span>
+                        <div class="flex items-center gap-1.5 mt-2">
+                          @for (star of [1, 2, 3, 4, 5]; track star) {
+                            <button
+                              type="button"
+                              (click)="setRating(star)"
+                              class="text-2xl transition duration-150 hover:scale-110"
+                              [class.text-amber-400]="star <= rating()"
+                              [class.text-slate-300]="star > rating()"
+                            >
+                              ★
+                            </button>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Comment Text Area -->
+                      <div>
+                        <label for="review-comment" class="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Your Review</label>
+                        <textarea
+                          id="review-comment"
+                          rows="4"
+                          [formControl]="commentControl"
+                          placeholder="What did you think of the product? Share your details..."
+                          class="w-full mt-2 rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-[var(--color-brand)] dark:border-white/10 dark:bg-slate-950"
+                        ></textarea>
+                      </div>
+
+                      <!-- Message feedbacks -->
+                      @if (reviewError()) {
+                        <p class="text-xs font-semibold text-red-600 bg-red-50 dark:bg-red-950/20 dark:text-red-400 px-3 py-2 rounded-xl">{{ reviewError() }}</p>
+                      }
+                      @if (reviewSuccess()) {
+                        <p class="text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-950/20 dark:text-green-400 px-3 py-2 rounded-xl">{{ reviewSuccess() }}</p>
+                      }
+
+                      <!-- Submit Button -->
+                      <button
+                        type="submit"
+                        [disabled]="submittingReview() || commentControl.invalid"
+                        class="rounded-full bg-[var(--color-brand)] py-3 text-sm font-bold text-white shadow-md shadow-orange-400/20 transition hover:opacity-90 disabled:opacity-50"
+                      >
+                        {{ submittingReview() ? 'Submitting...' : 'Submit Review' }}
+                      </button>
+
+                    </form>
+                  }
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Reviews List -->
+            <div class="lg:col-span-7">
+              @if (reviews().length === 0) {
+                <div class="rounded-3xl border border-dashed border-black/10 py-16 text-center dark:border-white/10">
+                  <span class="text-4xl text-slate-300 block mb-2">★</span>
+                  <h4 class="font-bold text-slate-800 dark:text-slate-200">No reviews yet</h4>
+                  <p class="text-sm text-slate-500">Be the first to review this product!</p>
+                </div>
+              } @else {
+                <div class="flex flex-col gap-6">
+                  @for (rev of reviews(); track rev._id) {
+                    <div class="rounded-3xl border border-black/10 bg-white/60 p-6 dark:border-white/10 dark:bg-slate-900/60 shadow-sm">
+                      <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                          <!-- User avatar initials -->
+                          <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-brand)] text-sm font-extrabold text-white">
+                            {{ rev.userId?.firstName?.charAt(0) || 'U' }}{{ rev.userId?.lastName?.charAt(0) || '' }}
+                          </div>
+                          <div>
+                            <span class="block text-sm font-bold text-slate-800 dark:text-slate-100">{{ rev.userId?.firstName }} {{ rev.userId?.lastName }}</span>
+                            <span class="block text-xs text-slate-400">{{ rev.createdAt | date:'longDate' }}</span>
+                          </div>
+                        </div>
+                        
+                        <!-- Review Stars -->
+                        <div class="flex text-amber-400">
+                          @for (star of [1,2,3,4,5]; track star) {
+                            <svg class="h-4 w-4" [class.fill-current]="star <= rev.rating" [class.stroke-current]="star > rev.rating" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.367 1.25.59 1.819l-3.97 2.883a1 1 0 00-.364 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.971-2.883a1 1 0 00-1.17 0l-3.971 2.883c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.364-1.118L2.98 9.41c-.777-.569-.371-1.819.59-1.819h4.907a1 1 0 00.95-.69l1.52-4.674z"/></svg>
+                          }
+                        </div>
+                      </div>
+                      
+                      <!-- Comment -->
+                      <p class="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{{ rev.comment }}</p>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+          </div>
+        </section>
+
+    }
+
+  </div>
+</div>

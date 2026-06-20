@@ -1,0 +1,66 @@
+.dashboard-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--border-radius-base);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  border-color: var(--color-brand);
+}
+
+.dark .dashboard-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  border-color: var(--color-brand);
+}
+
+table th {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+table td {
+  vertical-align: middle;
+}
+
+select.border-emerald-200 {
+  border-color: rgb(167, 243, 208) !important;
+}
+
+select.border-purple-200 {
+  border-color: rgb(233, 213, 255) !important;
+}
+
+select.border-blue-200 {
+  border-color: rgb(191, 219, 254) !important;
+}
+
+select.border-green-200 {
+  border-color: rgb(187, 247, 208) !important;
+}
+
+select.border-red-200 {
+  border-color: rgb(254, 202, 202) !important;
+}
+
+select.border-amber-200 {
+  border-color: rgb(253, 230, 138) !important;
+}
+
+.animate-in {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

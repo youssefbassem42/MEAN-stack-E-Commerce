@@ -6,7 +6,6 @@ import {
   signal,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { ProfileService, AddressDto, ProfileDto } from '../../../core/services/profile.service';
 
@@ -15,7 +14,7 @@ type Section = 'info' | 'password' | 'addresses';
 @Component({
   selector: 'app-profile-page',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './profile-page.component.html',
   styleUrl: './profile-page.component.css',
